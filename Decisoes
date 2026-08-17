@@ -1,0 +1,48 @@
+Parte T — Conceitos
+
+T1. Eu acho que comDesconto vai ficar [undefined, undefined, undefined]. 
+O motivo é que a arrow function usa chaves { }, e quando eu uso chaves eu preciso escrever return na mão, senão a função não devolve nada (fica undefined por padrão). 
+Nesse código ninguém escreveu return, então o preco * 0.9 até é calculado, mas o resultado se perde e não vai pra lugar nenhum. 
+E o map não quebra por causa disso, ele roda normal e só devolve undefined em cada posição, sem dar erro. 
+Se fosse escrito sem chaves, tipo preco => preco * 0.9, aí sim o resultado da conta já seria devolvido sozinho, sem precisar escrever return.
+
+T2. Pra pegar só os tickets abertos (item 1) eu usaria filter, porque eu só quero decidir se cada ticket fica ou não na lista, sem mudar o ticket em si. 
+Pra transformar cada ticket num texto tipo "Ticket #12 - aberto" (item 2) eu usaria map, porque aí eu quero trocar cada item por outra coisa (o texto), 
+mantendo a lista do mesmo tamanho. Se eu trocasse e usasse map no lugar de filter no item 1: a lista continuaria com todos os tickets, 
+os abertos e os fechados também, porque map não tira ninguém da lista, ele só transforma cada posição. Então em vez de "só os abertos" eu teria a lista inteira, 
+só que "transformada" por uma função que na verdade servia pra decidir se fica ou não — não ia fazer sentido. 
+Se eu trocasse e usasse filter no lugar de map no item 2: como o texto gerado (tipo "Ticket #12 - aberto") 
+nunca é uma string vazia, ele é sempre considerado "verdadeiro" pelo filter. 
+Então o filter ia manter todo mundo na lista (porque a condição sempre dá certo), mas devolvendo os tickets originais, não os textos que eu queria montar. 
+Não dá erro nenhum, só fica errado: eu queria textos e recebi os tickets de volta, do jeito que entraram.
+
+T3. Se eu rodar [].reduce((a, b) => a + b) numa lista vazia, sem passar valor inicial, dá erro (TypeError, algo como "Reduce of empty array with no initial value"). 
+Isso acontece porque, sem eu falar qual é o valor inicial do acumulador, o reduce tenta pegar o primeiro item do array pra começar — só que numa lista vazia 
+não existe primeiro item, então ele não tem de onde começar e quebra. Isso é diferente do somarCarrinho da Semana 2 porque lá eu mesmo criava 
+o acumulador antes, com let total = 0, fora do array. Então mesmo se a lista estivesse vazia, o for simplesmente não rodava nenhuma vez 
+e total continuava sendo 0 — nunca dependeu de ter algum item na lista pra existir um valor inicial.
+
+Parte C — Decisão
+
+Cenário 1. Acho que sim, pode enganar. Se "geral" é só uma fila onde caem os tickets que ainda ninguém olhou (não é uma fila de atendimento de verdade), 
+ela pode aparecer com um número bem alto só porque a triagem está atrasada, não porque tem muita gente esperando atendimento ali. 
+Se o dashboard olha esse número igual olha "suporte" ou "vendas" pra decidir onde colocar mais gente, dá pra acabar mandando atendente 
+pra uma fila que não resolve nada na prática, e deixando fila de verdade sem gente. 
+Eu mudaria mais em como o número é lido do que na função em si: tiraria "geral" da conta que decide alocação, ou mostraria ela separada, 
+como "esperando triagem", pra não competir com as filas de atendimento de verdade na mesma métrica. 
+Acho que dá pra até deixar a função do jeito que está, o problema principal é confiar nesse número sem separar o que é fila real do que é fila-limbo.
+
+Cenário 2. O problema é que, se o colega apaga direto do array original dentro do forEach, ele está mudando uma lista 
+que talvez esteja sendo usada em outro lugar do sistema também (por exemplo, uma tela que mostra todos os tickets, ou algum outro cálculo 
+que soma tickets abertos e fechados). Se essa mesma lista for referenciada em mais de um lugar, o outro lugar vai ver a lista diminuir sem ter feito nada, 
+o que pode causar bug estranho e difícil de achar depois. Eu não aceitaria essa "otimização". 
+filter devolver uma lista nova é bom justamente porque quem chama a função não espera que os dados originais mudem sozinhos. 
+E memória não parece ser um problema real aqui — uma lista de tickets não costuma ser tão grande a ponto de precisar economizar assim, 
+então o risco não compensa o ganho.
+
+Cenário 3. Acho que o motivo mais provável é parecido com o da T3: a função deve estar usando reduce sem valor inicial, 
+e nesse mês sem nenhum pedido a lista está vazia — então o reduce não tem primeiro elemento pra começar e dá erro. 
+Eu mudaria passando um valor inicial pro reduce (0, já que é uma soma), 
+porque isso resolve o problema de verdade: lista vazia é uma situação normal (loja nova sem venda ainda), não devia quebrar o sistema. 
+Eu não colocaria só um try/catch em volta pra "engolir" o erro, porque aí, se acontecer outro erro de verdade (tipo um pedido com valor errado), 
+ele também ia ser escondido, e o relatório ia continuar quebrando (ou pior, saindo errado) sem ninguém saber o motivo.

@@ -1,0 +1,71 @@
+// Semana 3 — Parte A
+// Fui fazendo uma função de cada vez, testando no console antes de seguir pra próxima.
+ 
+// A1. nomesDosContatos
+// Preciso pegar só o campo "nome" de cada contato da lista, sem mexer no resto.
+// Isso é claramente um "pra cada item, devolve outra coisa" -> map.
+function nomesDosContatos(
+  contatos: { nome: string; telefone: string }[]
+): string[] {
+  const nomes = contatos.map((contato) => {
+    return contato.nome;
+  });
+ 
+  return nomes;
+}
+ 
+// teste rápido que eu rodei no terminal (deixei aqui de lembrete):
+// nomesDosContatos([]) -> []
+// nomesDosContatos([{ nome: "Ana", telefone: "11999990000" }, { nome: "Bruno", telefone: "11988880000" }])
+// -> ["Ana", "Bruno"]
+ 
+// A2. ticketsAbertos
+// Aqui eu não quero transformar o ticket, só decidir se ele fica ou não na lista.
+// "fica ou não fica" é filter, não map.
+function ticketsAbertos(
+  tickets: { id: number; status: string }[]
+): { id: number; status: string }[] {
+  const abertos = tickets.filter((ticket) => {
+    // comparação sensível a maiúscula/minúscula, então "Aberto" não conta
+    return ticket.status === "aberto";
+  });
+ 
+  return abertos;
+}
+ 
+// A3. contarProdutosProximosDoVencimento
+// Primeiro eu filtro quem está a 30 dias ou menos (incluindo os já vencidos,
+// que são os negativos), depois só preciso saber QUANTOS sobraram -> .length
+function contarProdutosProximosDoVencimento(
+  produtos: { nome: string; diasParaVencer: number }[]
+): number {
+  const proximosOuVencidos = produtos.filter((produto) => {
+    return produto.diasParaVencer <= 30;
+  });
+ 
+  return proximosOuVencidos.length;
+}
+ 
+// A4. precosComDesconto
+// Cuidado que eu já caí nessa antes: se eu usar chaves { } no map e esquecer
+// o return, o array vem cheio de undefined. Por isso deixei o return bem explícito.
+function precosComDesconto(precos: number[], percentual: number): number[] {
+  const precosComDescontoAplicado = precos.map((preco) => {
+    const fatorDesconto = 1 - percentual / 100;
+    const precoComDesconto = preco * fatorDesconto;
+ 
+    // arredondar pra 2 casas decimais: multiplica por 100, arredonda, divide de volta
+    const precoArredondado = Math.round(precoComDesconto * 100) / 100;
+ 
+    return precoArredondado;
+  });
+ 
+  return precosComDescontoAplicado;
+}
+ 
+export {
+  nomesDosContatos,
+  ticketsAbertos,
+  contarProdutosProximosDoVencimento,
+  precosComDesconto,
+};

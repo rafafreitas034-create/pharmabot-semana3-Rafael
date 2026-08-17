@@ -1,0 +1,83 @@
+// Semana 3 — Parte B
+// Fui construindo em duas etapas: primeiro separei quem entra na contagem,
+// depois fui somando fila por fila.
+ 
+// agruparTicketsAbertosPorFila
+// Regras que eu anotei antes de começar:
+// - só conta ticket com status "aberto" (maiúscula/minúscula importa)
+// - ticket aberto com fila "" não entra em lugar nenhum, é ignorado
+// - fila só aparece no resultado se tiver pelo menos 1 ticket aberto
+function agruparTicketsAbertosPorFila(
+  tickets: { id: number; status: string; fila: string }[]
+): Record<string, number> {
+  // Passo 1: separar só quem realmente entra na contagem.
+  // Isso já resolve as duas primeiras regras de uma vez (status e fila vazia).
+  const ticketsQueContam = tickets.filter((ticket) => {
+    const estaAberto = ticket.status === "aberto";
+    const temFila = ticket.fila !== "";
+    return estaAberto && temFila;
+  });
+ 
+  // Passo 2: ir juntando a contagem, fila por fila, num objeto.
+  // Comecei o acumulador com {} porque no início nenhuma fila tem contagem ainda.
+  const contagemPorFila = ticketsQueContam.reduce(
+    (acumulador: Record<string, number>, ticket) => {
+      const contagemAtual = acumulador[ticket.fila];
+ 
+      // se a fila ainda não apareceu no acumulador, contagemAtual é undefined
+      // então eu trato isso como se fosse 0 antes de somar 1
+      if (contagemAtual === undefined) {
+        acumulador[ticket.fila] = 1;
+      } else {
+        acumulador[ticket.fila] = contagemAtual + 1;
+      }
+ 
+      return acumulador;
+    },
+    {}
+  );
+ 
+  return contagemPorFila;
+}
+ 
+// teste rápido que eu rodei no terminal (deixei aqui de lembrete):
+// agruparTicketsAbertosPorFila([]) -> {}
+// agruparTicketsAbertosPorFila([
+//   { id: 1, status: "aberto", fila: "suporte" },
+//   { id: 2, status: "aberto", fila: "vendas" },
+//   { id: 3, status: "fechado", fila: "suporte" },
+//   { id: 4, status: "aberto", fila: "suporte" },
+// ])
+// -> { suporte: 2, vendas: 1 }
+ 
+// Bônus: ticketMaisAntigoPorFila
+// Parecida com a de cima, mas em vez de contar eu guardo o menor id de cada fila.
+function ticketMaisAntigoPorFila(
+  tickets: { id: number; status: string; fila: string }[]
+): Record<string, number> {
+  // mesma ideia do passo 1 de cima: só entram tickets abertos com fila preenchida
+  const ticketsQueContam = tickets.filter((ticket) => {
+    const estaAberto = ticket.status === "aberto";
+    const temFila = ticket.fila !== "";
+    return estaAberto && temFila;
+  });
+ 
+  const maisAntigoPorFila = ticketsQueContam.reduce(
+    (acumulador: Record<string, number>, ticket) => {
+      const idGuardadoAteAgora = acumulador[ticket.fila];
+ 
+      // se a fila ainda não tem ninguém guardado, esse ticket já é o "mais antigo" dela
+      // se já tem alguém, só troco se o id desse ticket for MENOR (mais antigo)
+      if (idGuardadoAteAgora === undefined || ticket.id < idGuardadoAteAgora) {
+        acumulador[ticket.fila] = ticket.id;
+      }
+ 
+      return acumulador;
+    },
+    {}
+  );
+ 
+  return maisAntigoPorFila;
+}
+ 
+export { agruparTicketsAbertosPorFila, ticketMaisAntigoPorFila };
